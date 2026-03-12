@@ -24,6 +24,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import { UserSync } from "./components/UserSync";
+import { PushHandler } from "./components/PushHandler";
 import AdminRoute from "./components/AdminRoute";
 
 const queryClient = new QueryClient();
@@ -145,6 +146,7 @@ const App = () => (
     <AuthProvider>
       <AppStateProvider>
         <UserSync />
+        <PushHandler />
         <TooltipProvider>
           <Toaster />
           <Sonner />
