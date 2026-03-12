@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
+import { notifyWebhook } from "@/lib/notifyWebhook";
 
 export interface Bill {
   id: string;
@@ -78,13 +79,14 @@ export function useBills() {
   ) => {
     if (!userProfile) throw new Error("Must be logged in to add bill");
 
-    const newBill: Bill = {
+    const newBill = {
       ...data,
       createdBy: userProfile.uid,
       createdAt: serverTimestamp(),
-    };
+    } as Omit<Bill, "id">;
 
     const docRef = await addDoc(collection(db, "bills"), newBill);
+    notifyWebhook("billCreated", newBill);
 
     return { ...newBill, id: docRef.id };
   };

@@ -142,7 +142,33 @@ VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
 VITE_CLOUDINARY_UPLOAD_PRESET=your_unsigned_preset
 ```
 
-Cloudinary docs for unsigned uploads and presets: citeturn0search0turn0search1
+Cloudinary docs cover unsigned uploads and presets.
+
+## Notifications + Push (No Blaze Plan)
+
+This project uses an external webhook server to:
+
+- Create notification documents for other members.
+- Send FCM push notifications to their devices.
+
+### Setup (External Server)
+
+1. Create a Firebase **service account** JSON.
+2. Deploy the server in `server/` on a free host (Render/Railway).
+3. Set the server env:
+
+```bash
+FIREBASE_SERVICE_ACCOUNT={"type":"service_account",...}
+PORT=8787
+```
+
+4. Set in frontend `.env`:
+
+```bash
+VITE_NOTIFY_WEBHOOK_URL=https://your-server-url/notify
+```
+
+5. Deploy frontend and test (add deposit/expense/bill).
 
 ## App Routes
 

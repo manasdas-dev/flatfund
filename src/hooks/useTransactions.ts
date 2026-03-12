@@ -12,6 +12,7 @@ import {
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { haptics } from "@/lib/haptics";
+import { notifyWebhook } from "@/lib/notifyWebhook";
 
 export interface Deposit {
   id: string;
@@ -120,16 +121,17 @@ export function useTransactions() {
   ) => {
     if (!userProfile) throw new Error("Must be logged in to add deposit");
 
-    const newDeposit: Deposit = {
+    const newDeposit = {
       ...data,
       status: data.status || "confirmed",
       uid: data.uid || userProfile.uid,
       userName: data.userName || userProfile.name,
       userAvatar: data.userAvatar || userProfile.avatar || "",
       createdAt: serverTimestamp(),
-    };
+    } as Omit<Deposit, "id">;
 
     await addDoc(collection(db, "deposits"), newDeposit);
+    notifyWebhook("depositCreated", newDeposit);
 
     haptics.success();
   };
@@ -142,16 +144,17 @@ export function useTransactions() {
   ) => {
     if (!userProfile) throw new Error("Must be logged in to add expense");
 
-    const newExpense: Expense = {
+    const newExpense = {
       ...data,
       status: data.status || "confirmed",
       uid: data.uid || userProfile.uid,
       userName: data.userName || userProfile.name,
       userAvatar: data.userAvatar || userProfile.avatar || "",
       createdAt: serverTimestamp(),
-    };
+    } as Omit<Expense, "id">;
 
     await addDoc(collection(db, "expenses"), newExpense);
+    notifyWebhook("expenseCreated", newExpense);
 
     haptics.success();
   };

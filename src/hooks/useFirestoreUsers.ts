@@ -11,6 +11,7 @@ import {
 } from "firebase/firestore";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { db, getSecondaryAuth } from "@/lib/firebase";
+import { notifyWebhook } from "@/lib/notifyWebhook";
 
 interface FirestoreUser {
   uid: string;
@@ -82,6 +83,12 @@ export function useFirestoreUsers() {
     await setDoc(doc(db, "users", uid), {
       ...newUser,
       createdAt: serverTimestamp(),
+    });
+
+    notifyWebhook("memberCreated", {
+      uid,
+      name: newUser.name,
+      role: newUser.role,
     });
 
     return newUser;
