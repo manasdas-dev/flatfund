@@ -44,6 +44,7 @@ export const usePushNotifications = () => {
       const swRegistration = await navigator.serviceWorker.register(
         "/firebase-messaging-sw.js",
       );
+      await navigator.serviceWorker.ready;
 
       const token = await getToken(messaging, {
         vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY as string,
