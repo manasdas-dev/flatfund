@@ -4,7 +4,12 @@ type NotifyType =
   | "depositCreated"
   | "expenseCreated"
   | "billCreated"
-  | "memberCreated";
+  | "memberCreated"
+  | "reimbursementRequested"
+  | "reimbursementApproved"
+  | "billPaymentMarked"
+  | "billFullyPaid"
+  | "memberStatusChanged";
 
 export const notifyWebhook = async (type: NotifyType, payload: any) => {
   const url = import.meta.env.VITE_NOTIFY_WEBHOOK_URL as string;

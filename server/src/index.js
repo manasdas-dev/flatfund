@@ -37,6 +37,11 @@ const getAllUsers = async () => {
   return snap.docs.map((d) => d.data()).filter((u) => u && u.uid);
 };
 
+const getAdminUids = async () => {
+  const snap = await db.collection("users").where("role", "==", "admin").get();
+  return snap.docs.map((d) => d.data().uid).filter(Boolean);
+};
+
 const getTokensForUids = async (uids) => {
   const tokens = [];
   for (const idChunk of chunk(uids, 10)) {
@@ -90,11 +95,17 @@ const sendPushToUsers = async (uids, payload, actorUid) => {
   }
 };
 
+const notifyUsers = async (uids, payload, actorUid) => {
+  const clean = uids.filter(Boolean);
+  if (clean.length === 0) return;
+  await createNotificationsForUsers(clean, payload, actorUid);
+  await sendPushToUsers(clean, payload, actorUid);
+};
+
 const notifyAllUsers = async (payload, actorUid) => {
   const users = await getAllUsers();
   const uids = users.map((u) => u.uid).filter(Boolean);
-  await createNotificationsForUsers(uids, payload, actorUid);
-  await sendPushToUsers(uids, payload, actorUid);
+  await notifyUsers(uids, payload, actorUid);
 };
 
 app.post("/notify", async (req, res) => {
@@ -155,6 +166,63 @@ app.post("/notify", async (req, res) => {
 
     if (!message) {
       return res.status(400).json({ error: "Unknown type" });
+    }
+
+    if (type === "reimbursementRequested") {
+      const admins = await getAdminUids();
+      await notifyUsers(admins, {
+        title: "Reimbursement requested",
+        body: `${payload?.userName || "A member"} requested ₹${payload?.amount || ""}.`,
+        type: "warning",
+        link: "/admin",
+      }, actorUid);
+      return res.json({ ok: true });
+    }
+
+    if (type === "reimbursementApproved") {
+      const target = payload?.userId ? [payload.userId] : [];
+      await notifyUsers(target, {
+        title: "Reimbursement approved",
+        body: `Your reimbursement of ₹${payload?.amount || ""} was approved.`,
+        type: "success",
+        link: "/expenses",
+      }, actorUid);
+      return res.json({ ok: true });
+    }
+
+    if (type === "billPaymentMarked") {
+      const target = payload?.userId ? [payload.userId] : [];
+      await notifyUsers(target, {
+        title: "Payment recorded",
+        body: `Your share for ${payload?.billName || "a bill"} is marked as paid.`,
+        type: "success",
+        link: "/bills",
+      }, actorUid);
+      return res.json({ ok: true });
+    }
+
+    if (type === "billFullyPaid") {
+      const target = Array.isArray(payload?.memberUids) ? payload.memberUids : [];
+      await notifyUsers(target, {
+        title: "Bill fully paid",
+        body: `${payload?.billName || "A bill"} has been fully settled.`,
+        type: "success",
+        link: "/bills",
+      }, actorUid);
+      return res.json({ ok: true });
+    }
+
+    if (type === "memberStatusChanged") {
+      const target = payload?.userId ? [payload.userId] : [];
+      await notifyUsers(target, {
+        title: payload?.isActive ? "Account activated" : "Account deactivated",
+        body: payload?.isActive
+          ? "Your account has been activated."
+          : "Your account has been deactivated.",
+        type: payload?.isActive ? "success" : "warning",
+        link: "/profile",
+      }, actorUid);
+      return res.json({ ok: true });
     }
 
     await notifyAllUsers(message, actorUid);

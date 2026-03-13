@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { notifyWebhook } from "@/lib/notifyWebhook";
 import {
   Dialog,
   DialogContent,
@@ -40,7 +41,6 @@ import { useFirestoreUsers } from "@/hooks/useFirestoreUsers";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { getDefaultAvatar } from "@/lib/avatar";
-import { sendNotification } from "@/lib/notifications";
 import { useAppState } from "@/state/AppState";
 import { getCategoryIcon } from "@/lib/icons";
 import { exportToExcel, exportToPDF } from "@/lib/exportUtils";
@@ -265,40 +265,13 @@ export default function Expenses() {
         });
       } else {
         await addExpenseToFirestore(commonData as any);
-        // Notify all users via Firestore (in-app bell)
-        await sendNotification(
-          "all",
-          "New Expense",
-          `New ${expenseType} expense of ₹${commonData.amount} by ${commonData.userName}.`,
-          "info",
-        );
-
-        // Trigger FCM push notification to all devices (fire-and-forget)
-        fetch("/api/expenses", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+        if (expenseType === "self" && requestReimbursement) {
+          notifyWebhook("reimbursementRequested", {
             userId: commonData.uid,
             userName: commonData.userName,
             amount: commonData.amount,
-            category: commonData.category,
-            type: commonData.type,
-          }),
-        }).catch(() => {});
-
-        // If reimbursement was requested, also notify admins via push
-        if (expenseType === "self" && requestReimbursement) {
-          fetch("/api/reimbursements/request", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              userId: commonData.uid,
-              userName: commonData.userName,
-              amount: commonData.amount,
-            }),
-          }).catch(() => {});
+          });
         }
-
         toast({
           title: "Expense Added",
           description: `Successfully recorded ${expenseType} expense of ₹${commonData.amount}.`,

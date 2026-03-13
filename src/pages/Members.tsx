@@ -52,6 +52,7 @@ import { useFirestoreUsers } from "@/hooks/useFirestoreUsers";
 import { useTransactions } from "@/hooks/useTransactions";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { notifyWebhook } from "@/lib/notifyWebhook";
 
 import { getDefaultAvatar } from "@/lib/avatar";
 
@@ -327,6 +328,10 @@ export default function Members() {
     try {
       if (member.isActive) {
         await updateUser(member.id, { isActive: false });
+        notifyWebhook("memberStatusChanged", {
+          userId: member.id,
+          isActive: false,
+        });
         toast({
           title: "Member Deactivated",
           description: `Successfully deactivated ${member.name}.`,
@@ -779,10 +784,14 @@ export default function Members() {
                               {member.isActive ? (
                                 <DropdownMenuItem
                                   className="text-red-600"
-                                  onClick={() =>
-                                    updateUser &&
-                                    updateUser(member.id, { isActive: false })
-                                  }
+                                  onClick={async () => {
+                                    if (!updateUser) return;
+                                    await updateUser(member.id, { isActive: false });
+                                    notifyWebhook("memberStatusChanged", {
+                                      userId: member.id,
+                                      isActive: false,
+                                    });
+                                  }}
                                 >
                                   <UserMinus className="h-4 w-4 mr-2" />
                                   Deactivate
@@ -790,10 +799,14 @@ export default function Members() {
                               ) : (
                                 <DropdownMenuItem
                                   className="text-green-600"
-                                  onClick={() =>
-                                    updateUser &&
-                                    updateUser(member.id, { isActive: true })
-                                  }
+                                  onClick={async () => {
+                                    if (!updateUser) return;
+                                    await updateUser(member.id, { isActive: true });
+                                    notifyWebhook("memberStatusChanged", {
+                                      userId: member.id,
+                                      isActive: true,
+                                    });
+                                  }}
                                 >
                                   <CheckCircle className="h-4 w-4 mr-2" />
                                   Activate

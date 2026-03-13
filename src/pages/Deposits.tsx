@@ -48,7 +48,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { getDefaultAvatar } from "@/lib/avatar";
-import { sendNotification } from "@/lib/notifications";
 
 export default function Deposits() {
   const {
@@ -223,25 +222,6 @@ export default function Deposits() {
       };
 
       await addDepositToFirestore(depositData as any);
-
-      // Notify all users via Firestore (in-app bell)
-      await sendNotification(
-        "all",
-        "New Deposit",
-        `New deposit of ₹${depositData.amount} from ${depositData.userName}.`,
-        "success",
-      );
-
-      // Trigger FCM push notification to all devices (fire-and-forget)
-      fetch("/api/deposits", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: depositData.uid,
-          userName: depositData.userName,
-          amount: depositData.amount,
-        }),
-      }).catch(() => {});
 
       toast({
         title: "Deposit Added",

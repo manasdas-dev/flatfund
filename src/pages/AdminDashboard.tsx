@@ -36,7 +36,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { getCategoryIcon } from "@/lib/icons";
 import { archiveMonth } from "@/lib/archiver";
-import { sendNotification } from "@/lib/notifications";
 import {
   Dialog,
   DialogContent,
@@ -60,6 +59,7 @@ import { cn } from "@/lib/utils";
 import { format, addMonths, startOfMonth } from "date-fns";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { notifyWebhook } from "@/lib/notifyWebhook";
 
 export default function AdminDashboard() {
   const { settings, updateSettings } = useAppState();
@@ -322,28 +322,13 @@ export default function AdminDashboard() {
 
       await addExpenseToFirestore(fundExpense as any);
 
-      // Notify the user
-      await sendNotification(
-        req.uid,
-        "Reimbursement Approved",
-        `Your request for ₹${req.amount} has been approved.`,
-        "success",
-      );
-
       // mark original expense as reimbursed
       await updateExpenseInFirestore(req.expenseId, { status: "reimbursed" });
-
-      // Trigger push notification to the member (fire-and-forget)
-      fetch("/api/reimbursements/approve", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: req.uid,
-          amount: req.amount || 0,
-          approved: true,
-          adminName: userProfile?.name || "Admin",
-        }),
-      }).catch(() => {});
+      notifyWebhook("reimbursementApproved", {
+        userId: req.uid,
+        amount: req.amount || 0,
+        adminName: userProfile?.name || "Admin",
+      });
     } catch (error) {
       console.error("Error approving reimbursement:", error);
       alert("Failed to approve reimbursement");

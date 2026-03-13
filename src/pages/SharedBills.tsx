@@ -20,8 +20,8 @@ import {
   useNotifications,
   requestNotificationPermission,
   showBrowserNotification,
-  sendNotification,
 } from "@/lib/notifications";
+import { notifyWebhook } from "@/lib/notifyWebhook";
 import {
   Select,
   SelectContent,
@@ -237,27 +237,6 @@ export default function SharedBills() {
 
     try {
       await addBillToFirestore(billData);
-
-      // Notify all users via Firestore (in-app bell)
-      await sendNotification(
-        "all",
-        "New Shared Bill",
-        `A new ${billData.type} bill of ₹${amount} (₹${perMemberShare} each) has been added.`,
-        "info",
-      );
-
-      // Trigger FCM push notification to all devices (fire-and-forget)
-      fetch("/api/bills", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: userProfile?.uid,
-          userName: userProfile?.name,
-          billTitle: billData.type,
-          amount,
-          perMemberShare,
-        }),
-      }).catch(() => {});
 
       // reset forms on success
       setBillTypeValue(billTypes[0].value);
@@ -1094,14 +1073,11 @@ export default function SharedBills() {
                                       memberPayments: newPayments,
                                       status,
                                     });
-                                    const billName =
-                                      selectedBill.type || "Shared Bill";
-                                    sendNotification(
-                                      m.uid,
-                                      "Payment Recorded",
-                                      `Your share for ${billName} is marked as paid.`,
-                                      "success",
-                                    );
+                                    notifyWebhook("billPaymentMarked", {
+                                      userId: m.uid,
+                                      billName:
+                                        selectedBill.type || "Shared Bill",
+                                    });
                                     setSelectedBill({
                                       ...selectedBill,
                                       memberPayments: newPayments,
@@ -1138,15 +1114,9 @@ export default function SharedBills() {
                           status: "paid",
                           memberPayments: newPayments,
                         });
-
-                        // Notify all involved members
-                        Object.keys(newPayments).forEach((uid) => {
-                          sendNotification(
-                            uid,
-                            "Bill Paid",
-                            `${selectedBill.type} has been fully settled.`,
-                            "success",
-                          );
+                        notifyWebhook("billFullyPaid", {
+                          memberUids: Object.keys(newPayments),
+                          billName: selectedBill.type || "Shared Bill",
                         });
 
                         setSelectedBill({
