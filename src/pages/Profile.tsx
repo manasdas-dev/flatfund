@@ -461,7 +461,10 @@ export default function Profile() {
             </p>
           </div>
           {hasChanges && (
-            <Button onClick={saveUserChanges} disabled={isSaving || isUploadingAvatar}>
+            <Button
+              onClick={saveUserChanges}
+              disabled={isSaving || isUploadingAvatar}
+            >
               <Save className="h-4 w-4 mr-2" />
               {isSaving ? "Saving..." : "Save Changes"}
             </Button>

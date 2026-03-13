@@ -170,58 +170,82 @@ app.post("/notify", async (req, res) => {
 
     if (type === "reimbursementRequested") {
       const admins = await getAdminUids();
-      await notifyUsers(admins, {
-        title: "Reimbursement requested",
-        body: `${payload?.userName || "A member"} requested ₹${payload?.amount || ""}.`,
-        type: "warning",
-        link: "/admin",
-      }, actorUid);
+      await notifyUsers(
+        admins,
+        {
+          title: "Reimbursement requested",
+          body: `${payload?.userName || "A member"} requested ₹${payload?.amount || ""}.`,
+          type: "warning",
+          link: "/admin",
+        },
+        actorUid,
+      );
       return res.json({ ok: true });
     }
 
     if (type === "reimbursementApproved") {
       const target = payload?.userId ? [payload.userId] : [];
-      await notifyUsers(target, {
-        title: "Reimbursement approved",
-        body: `Your reimbursement of ₹${payload?.amount || ""} was approved.`,
-        type: "success",
-        link: "/expenses",
-      }, actorUid);
+      await notifyUsers(
+        target,
+        {
+          title: "Reimbursement approved",
+          body: `Your reimbursement of ₹${payload?.amount || ""} was approved.`,
+          type: "success",
+          link: "/expenses",
+        },
+        actorUid,
+      );
       return res.json({ ok: true });
     }
 
     if (type === "billPaymentMarked") {
       const target = payload?.userId ? [payload.userId] : [];
-      await notifyUsers(target, {
-        title: "Payment recorded",
-        body: `Your share for ${payload?.billName || "a bill"} is marked as paid.`,
-        type: "success",
-        link: "/bills",
-      }, actorUid);
+      await notifyUsers(
+        target,
+        {
+          title: "Payment recorded",
+          body: `Your share for ${payload?.billName || "a bill"} is marked as paid.`,
+          type: "success",
+          link: "/bills",
+        },
+        actorUid,
+      );
       return res.json({ ok: true });
     }
 
     if (type === "billFullyPaid") {
-      const target = Array.isArray(payload?.memberUids) ? payload.memberUids : [];
-      await notifyUsers(target, {
-        title: "Bill fully paid",
-        body: `${payload?.billName || "A bill"} has been fully settled.`,
-        type: "success",
-        link: "/bills",
-      }, actorUid);
+      const target = Array.isArray(payload?.memberUids)
+        ? payload.memberUids
+        : [];
+      await notifyUsers(
+        target,
+        {
+          title: "Bill fully paid",
+          body: `${payload?.billName || "A bill"} has been fully settled.`,
+          type: "success",
+          link: "/bills",
+        },
+        actorUid,
+      );
       return res.json({ ok: true });
     }
 
     if (type === "memberStatusChanged") {
       const target = payload?.userId ? [payload.userId] : [];
-      await notifyUsers(target, {
-        title: payload?.isActive ? "Account activated" : "Account deactivated",
-        body: payload?.isActive
-          ? "Your account has been activated."
-          : "Your account has been deactivated.",
-        type: payload?.isActive ? "success" : "warning",
-        link: "/profile",
-      }, actorUid);
+      await notifyUsers(
+        target,
+        {
+          title: payload?.isActive
+            ? "Account activated"
+            : "Account deactivated",
+          body: payload?.isActive
+            ? "Your account has been activated."
+            : "Your account has been deactivated.",
+          type: payload?.isActive ? "success" : "warning",
+          link: "/profile",
+        },
+        actorUid,
+      );
       return res.json({ ok: true });
     }
 

@@ -538,7 +538,9 @@ export default function Members() {
                           type={showNewConfirmPassword ? "text" : "password"}
                           placeholder="Re-enter password"
                           value={newConfirmPassword}
-                          onChange={(e) => setNewConfirmPassword(e.target.value)}
+                          onChange={(e) =>
+                            setNewConfirmPassword(e.target.value)
+                          }
                           disabled={isCreating}
                           required
                           className="pr-10"
@@ -786,7 +788,9 @@ export default function Members() {
                                   className="text-red-600"
                                   onClick={async () => {
                                     if (!updateUser) return;
-                                    await updateUser(member.id, { isActive: false });
+                                    await updateUser(member.id, {
+                                      isActive: false,
+                                    });
                                     notifyWebhook("memberStatusChanged", {
                                       userId: member.id,
                                       isActive: false,
@@ -801,7 +805,9 @@ export default function Members() {
                                   className="text-green-600"
                                   onClick={async () => {
                                     if (!updateUser) return;
-                                    await updateUser(member.id, { isActive: true });
+                                    await updateUser(member.id, {
+                                      isActive: true,
+                                    });
                                     notifyWebhook("memberStatusChanged", {
                                       userId: member.id,
                                       isActive: true,

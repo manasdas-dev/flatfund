@@ -115,6 +115,27 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "tnum";
+    background-attachment: fixed;
+  }
+
+  .dark body {
+    background-color: #0a0a0a;
+    background-image:
+      radial-gradient(
+        800px circle at 20% 10%,
+        rgba(22, 187, 186, 0.18),
+        transparent 60%
+      ),
+      radial-gradient(
+        700px circle at 80% 20%,
+        rgba(245, 158, 11, 0.12),
+        transparent 55%
+      ),
+      linear-gradient(180deg, #0a0a0a 0%, #09090b 100%);
+  }
+
+  .dark #root {
+    background: transparent;
   }
 
   .font-mono {

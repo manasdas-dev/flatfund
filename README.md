@@ -234,23 +234,23 @@ Local data lives in `src/lib/localDb.ts` and includes:
 
 Admins can do everything members can, plus:
 
-1. **Admin Dashboard**  
-   - View overall fund balance and member contribution status.  
-   - Monitor reimbursement requests.  
-   - Generate reports and export views.  
+1. **Admin Dashboard**
+   - View overall fund balance and member contribution status.
+   - Monitor reimbursement requests.
+   - Generate reports and export views.
    - Close a month and create archives.
 
-2. **Members**  
-   - Add new members.  
-   - Edit targets and status.  
+2. **Members**
+   - Add new members.
+   - Edit targets and status.
    - Activate/deactivate or remove members.
 
-3. **Expenses / Deposits / Bills**  
-   - Monitor and reconcile fund expenses.  
+3. **Expenses / Deposits / Bills**
+   - Monitor and reconcile fund expenses.
    - Validate member activity for the active period.
 
-4. **Settings**  
-   - Configure general app settings (currency, date format, active period).  
+4. **Settings**
+   - Configure general app settings (currency, date format, active period).
    - Manage categories and notification preferences.
 
 ## Project Structure (High Level)

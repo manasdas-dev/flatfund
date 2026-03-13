@@ -50,8 +50,14 @@ export function useTransactions() {
   const { userProfile } = useAuth();
 
   useEffect(() => {
-    const depositsQuery = query(collection(db, "deposits"), orderBy("date", "desc"));
-    const expensesQuery = query(collection(db, "expenses"), orderBy("date", "desc"));
+    const depositsQuery = query(
+      collection(db, "deposits"),
+      orderBy("date", "desc"),
+    );
+    const expensesQuery = query(
+      collection(db, "expenses"),
+      orderBy("date", "desc"),
+    );
 
     const unsubDeposits = onSnapshot(depositsQuery, (snap) => {
       const data = snap.docs.map((d) => ({

@@ -1,9 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import {
-  deleteToken,
-  getToken,
-  onMessage,
-} from "firebase/messaging";
+import { deleteToken, getToken, onMessage } from "firebase/messaging";
 import {
   collection,
   deleteDoc,
